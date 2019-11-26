@@ -53,6 +53,18 @@
     set_fact:
       offline: "{{ '--offline' if ovirt_engine_setup_offline else '' }}"
 
+  # WA for RHV 4.4.0-5
+  - name: Add line
+    lineinfile:
+      path: /usr/bin/ovirt-aaa-jdbc-tool
+      insertbefore: ^[\s]-Djava\.security\.auth\.login\.config
+      line: "        --add-modules java.se \\"
+      state: present
+
+  - name: Select right java environment
+    command: alternatives --set java /usr/lib/jvm/java-11-openjdk-11.0.5.10-0.el7_7.x86_64/bin/java
+  # End of WA
+
   - name: Run engine-setup with answerfile
     command: "engine-setup --accept-defaults --config-append={{ answer_file_path }} {{ offline }}"
     tags:
